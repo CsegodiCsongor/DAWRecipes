@@ -1,0 +1,16 @@
+.card {
+  margin-bottom: 2em;
+  width: 18em;
+  height:18em;
+}
+
+.jumbotron {
+  background: url('https://assets.nhs.uk/prod/images/T_0318_food-digestion_fry-up_66928.2e16d0ba.fill-920x613.jpg');
+  background-size: cover;
+  border-radius: 0;
+}
+
+.jumbotron-heading, p.lead {
+  color: white;
+  text-shadow: 2px 2px 5px #000000;
+}

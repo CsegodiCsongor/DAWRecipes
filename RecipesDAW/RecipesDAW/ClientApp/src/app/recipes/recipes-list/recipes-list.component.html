@@ -1,0 +1,61 @@
+<!--<h1>Recipes</h1>
+<p>Many recipes in the list</p>
+<div class="example-button-row">
+  <button mat-raised-button [routerLink]='["../edit"]' color="primary">Add</button>
+</div>
+<table mat-table [dataSource]="recipes" class="mat-elevation-z8">
+  <ng-container matColumnDef="title">
+    <th mat-header-cell *matHeaderCellDef style="width:45%"> Title </th>
+    <td mat-cell *matCellDef="let recipe"> {{recipe.title}} </td>
+  </ng-container>
+  <ng-container matColumnDef="description">
+    <th mat-header-cell *matHeaderCellDef style="width:45%"> Description </th>
+    <td mat-cell *matCellDef="let recipe"> {{recipe.description}} </td>
+  </ng-container>
+  <ng-container matColumnDef="action">
+    <th mat-header-cell *matHeaderCellDef style="width:10%"> Action </th>
+    <td mat-cell *matCellDef="let recipe">
+      <button mat-icon-button matTooltip="Edit" [matTooltipPosition]="'after'">
+        <mat-icon aria-label="Example icon-button with a heart icon" [routerLink]="['../edit', recipe.id]">edit</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Delete" [matTooltipPosition]="'after'">
+        <mat-icon aria-label="Example icon-button with a heart icon " (click)="deleteRecipe(recipe)">delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+<mat-progress-bar mode="indeterminate" *ngIf="!recipes"></mat-progress-bar>-->
+
+
+<section class="jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">Best Recipes</h1>
+    <div class="d-flex justify-content-center">
+      <p class="lead w-50">
+        A collection of our favorite recipes !!!
+      </p>
+    </div>
+    <p>
+      <a routerLink="/edit/new" class="btn btn-primary">Add New Recipe</a>
+    </p>
+  </div>
+</section>
+<section class="container">
+  <div class="row">
+    <ng-container *ngFor="let recipe of recipes">
+      <div class="col d-flex justify-content-center">
+        <div class="card">
+          <img class="card-img-top" [src]="recipe.imageUrl" alt="{{recipe.title}}" height="250">
+          <div class="card-body">
+            <h5 class="card-title">{{recipe.title}}</h5>
+            <p class="card-text">{{recipe.description}}</p>
+            <a routerLink="/show/{{recipe.id}}" class="btn btn-primary">View</a>
+            <!--<a routerLink="['../edit', recipe.id]" class="btn btn-primary">View</a>-->
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</section>
