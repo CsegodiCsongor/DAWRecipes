@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AngularMaterialModule } from '../shared/angular-material.module';
+import { Local } from 'protractor/built/driverProviders';
 
 @Component({
   selector: 'app-nav-menu',
@@ -15,5 +16,9 @@ export class NavMenuComponent {
 
   toggle() {
     this.isExpanded = !this.isExpanded;
+  }
+
+  LogOut() {
+    localStorage.clear();
   }
 }

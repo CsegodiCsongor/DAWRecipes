@@ -122,6 +122,12 @@ namespace RecipesDAW.Controllers
                 recipe1.Serves = recipe.Serves;
                 recipe1.ImageUrl = recipe.ImageUrl;
                 recipe1.Description = recipe.Description;
+
+                List<Ingredient> ing = _context.Ingredients.Where(i => i.Recipe.Id == recipe.Id).ToList();
+                List<Instruction> inst = _context.instructions.Where(i => i.Recipe.Id == recipe.Id).ToList();
+                ing.Clear();
+                inst.Clear();
+
                 recipe1.Ingredients = recipe.Ingredients;
                 recipe1.Instructions = recipe.Instructions;
             }

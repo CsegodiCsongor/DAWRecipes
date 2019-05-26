@@ -1,16 +1,18 @@
-.card {
-  margin-bottom: 2em;
-  width: 18em;
-  height:18em;
-}
-
-.jumbotron {
-  background: url('https://assets.nhs.uk/prod/images/T_0318_food-digestion_fry-up_66928.2e16d0ba.fill-920x613.jpg');
-  background-size: cover;
-  border-radius: 0;
-}
-
-.jumbotron-heading, p.lead {
+.container {
   color: white;
   text-shadow: 2px 2px 5px #000000;
 }
+
+/*!
+ * Start Bootstrap - Full Width Pics (https://startbootstrap.com/template-overviews/full-width-pics)
+ * Copyright 2013-2019 Start Bootstrap
+ * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-full-width-pics/blob/master/LICENSE)
+ */
+body {
+  padding-top: 56px;
+}
+
+.bg-image-full {
+  background-size: cover;
+}
+

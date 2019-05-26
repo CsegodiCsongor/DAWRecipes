@@ -38,9 +38,8 @@ export class RecipeShowComponent implements OnInit {
 
   deleteRecipe(recipe: Recipe) {
     this.recipesService.deleteRecipe(recipe.id).subscribe(x => {
-      this.loadRecipes();
+      this.router.navigate(['']);
     });
-    this.router.navigate(['']);
 
   }
 

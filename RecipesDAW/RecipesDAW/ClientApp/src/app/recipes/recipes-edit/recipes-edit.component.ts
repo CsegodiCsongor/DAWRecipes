@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray, Form } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, Form, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { RecipesService } from '../recipes.service';
@@ -12,7 +12,7 @@ import { Recipe, Ingredient, Instruction } from './../recipes.models';
 })
 export class RecipesEditComponent implements OnInit {
 
-  private routerLink: string = '../list';
+  private routerLink: string = '';
 
   public recipe: Recipe;
 
@@ -20,7 +20,7 @@ export class RecipesEditComponent implements OnInit {
 
   private isEdit: boolean = false;
 
-  public formGroup: FormGroup;
+  public recipeForm: FormGroup;
   private instructions: FormArray;
   private ingredients: FormArray;
 
@@ -30,7 +30,7 @@ export class RecipesEditComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private recipesService: RecipesService,
-    private formBuilder: FormBuilder) { }
+    private fb: FormBuilder) { }
 
 
 
@@ -39,26 +39,28 @@ export class RecipesEditComponent implements OnInit {
     this.recipeID = this.route.snapshot.params['id'];
 
     if (this.recipeID != 'new') {
-      this.routerLink = '../../list';
+      this.routerLink = '';
       this.isEdit = true;
     }
     else {
-      this.recipesService.loadRecipe(this.recipeID).subscribe(res => {
-        this.recipe = res;
-      });
+      this.recipeID = null;
+      //this.recipe = <Recipe>{};
     }
 
-    this.initForm(this.recipe ? this.recipe : <Recipe>{});
+    this.recipesService.loadRecipe(this.recipeID).subscribe(res => {
+      this.recipe = res;
+      this.initForm(this.recipe);
+    });
 
   }
 
 
 
   save() {
-    Object.keys(this.formGroup.controls).forEach(control => {
-      this.formGroup.get(control).markAsTouched();
+    Object.keys(this.recipeForm.controls).forEach(control => {
+      this.recipeForm.get(control).markAsTouched();
     });
-    const { title, description, serves, imageUrl, ingredients, instructions } = this.formGroup.value;
+    const { title, description, serves, imageUrl, ingredients, instructions } = this.recipeForm.value;
 
     //const filteredInstructions = instructions.map(item => item.instruction);
 
@@ -86,29 +88,30 @@ export class RecipesEditComponent implements OnInit {
 
 
   initForm(recipe: Recipe) {
+
     if (this.isEdit) {
-      this.formGroup = this.formBuilder.group({
+      this.recipeForm = this.fb.group({
         title: [recipe.title],
         description: [recipe.description],
         serves: [recipe.serves],
         imageUrl: [recipe.imageUrl],
-        ingredients: this.formBuilder.array([]),
-        instructions: this.formBuilder.array([])
+        instructions: this.fb.array([]),
+        ingredients: this.fb.array([])
       });
     }
     else {
-      this.formGroup = this.formBuilder.group({
+      this.recipeForm = this.fb.group({
         title: [''],
         description: [''],
         serves: [''],
         imageUrl: [''],
-        instructions: this.formBuilder.array([]),
-        ingredients: this.formBuilder.array([])
+        instructions: this.fb.array([]),
+        ingredients: this.fb.array([])
       });
     }
 
-    this.instructions = this.formGroup.get('instructions') as FormArray;
-    this.ingredients = this.formGroup.get('ingredients') as FormArray;
+    this.instructions = this.recipeForm.get('instructions') as FormArray;
+    this.ingredients = this.recipeForm.get('ingredients') as FormArray;
 
     if (this.isEdit) {
       this.recipe.ingredients.forEach(ingredient => {
@@ -123,12 +126,13 @@ export class RecipesEditComponent implements OnInit {
       this.instructions.push(this.createInstruction(""));
       this.ingredients.push(this.createIngredient("", ""));
     }
+    //console.log(this.recipeForm.value);
   }
 
 
 
   private createIngredient(amount: string, name: string): FormGroup {
-    return this.formBuilder.group({
+    return this.fb.group({
       amount: [amount],
       name: [name]
     });
@@ -137,7 +141,7 @@ export class RecipesEditComponent implements OnInit {
 
 
   private createInstruction(instruction: string): FormGroup {
-    return this.formBuilder.group({
+    return this.fb.group({
       instruction: [instruction]
     });
   }

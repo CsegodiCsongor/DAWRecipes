@@ -1,11 +1,18 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <a routerLink="" class="navbar-brand">MyRecipes</a>
-  <div class="collapse navbar-collapse">
-    <ul class="navbar-nav ml-auto mt-2">
+  <div class="collapse navbar-collapse" id="navbarResponsive">
+    <ul class="navbar-nav ml-auto">
       <li class="nav-item active">
-        <a routerLink="edit/new" class="nav-link">Add Recipe</a>
-        <a routerLink="login" class="nav-link">Log In</a>
-        <a routerLink="register" class="nav-link">Register</a>
+        <a routerLink="edit/new" class="nav-link js-scroll-trigger">Add Recipe</a>
+      </li>
+      <li  class="nav-item active">
+        <a routerLink="login" class="nav-link js-scroll-trigger">Log In</a>
+      </li>
+      <li class="nav-item active">
+        <a routerLink="register" class="nav-link js-scroll-trigger">Register</a>
+      </li>
+      <li  class="nav-item active">
+        <a (click)="LogOut()" class="nav-link js-scroll-trigger">LogOut</a>
       </li>
     </ul>
   </div>

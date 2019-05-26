@@ -1,4 +1,4 @@
-<img src="{{recipe.imageUrl}}" alt="{{recipe.title}}" class="header-image">
+<img src="{{recipe.imageUrl}}" alt="{{recipe.title}}" class="header-image bg-image-full">
 <div class="container">
   <div class="row w-100 d-flex justify-content-end">
     <button class="btn btn-danger" (click)="deleteRecipe(recipe)">Delete</button>
@@ -26,7 +26,7 @@
       <div class="col-6">
         <h3 class="text-center">instructions</h3>
         <ol>
-          <li *ngFor="let instructionss of recipe.instructions">
+          <li class="text-center" *ngFor="let instructionss of recipe.instructions">
             {{instructionss.instruction}}
           </li>
         </ol>
