@@ -1,13 +1,9 @@
 .container {
-  color: white;
+  color:white;
   text-shadow: 2px 2px 5px #000000;
+  padding-top: 10px;
 }
 
-/*!
- * Start Bootstrap - Full Width Pics (https://startbootstrap.com/template-overviews/full-width-pics)
- * Copyright 2013-2019 Start Bootstrap
- * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-full-width-pics/blob/master/LICENSE)
- */
 body {
   padding-top: 56px;
 }
@@ -15,4 +11,14 @@ body {
 .bg-image-full {
   background-size: cover;
 }
+
+img{
+  max-height:300px;
+}
+
+.card{
+  background-color:dimgray;
+}
+
+
 

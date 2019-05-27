@@ -16,21 +16,23 @@
         <hr>
       </div>
     </div>
+
     <div class="row d-flex justify-content-center">
+
       <div class="col-4 text-center">
-        <h3>ingredients</h3>
+        <h3>Ingredients</h3>
         <div *ngFor="let ingredient of recipe.ingredients">
           {{ingredient.amount}} - {{ingredient.name}}
         </div>
       </div>
-      <div class="col-6">
-        <h3 class="text-center">instructions</h3>
-        <ol>
-          <li class="text-center" *ngFor="let instructionss of recipe.instructions">
-            {{instructionss.instruction}}
-          </li>
-        </ol>
+
+      <div class="col-6 text-center">
+        <h3>Instructions</h3>
+          <div *ngFor="let instructionss of recipe.instructions; let i = index">
+            {{i+1}} : {{instructionss.instruction}}
+          </div>
       </div>
+
     </div>
     <div class="row back-and-edit d-flex justify-content-center">
       <button class="btn btn-primary" routerLink="/list">Back</button>

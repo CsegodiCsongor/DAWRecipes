@@ -45,12 +45,11 @@
   </header>
 <!--</section>-->
 
-<section class="container">
-  <div class="row">
+<section class="container row">
     <ng-container *ngFor="let recipe of recipes">
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="card h-100">
-          <img class="card-img-top" [src]="recipe.imageUrl" alt="{{recipe.title}}" alt>
+          <img class="card-img-top" [src]="recipe.imageUrl" alt="{{recipe.title}}">
           <div class="card-body">
             <h5 class="card-title">{{recipe.title}}</h5>
             <p class="card-text">{{recipe.description}}</p>
@@ -59,5 +58,4 @@
         </div>
       </div>
     </ng-container>
-  </div>
 </section>
