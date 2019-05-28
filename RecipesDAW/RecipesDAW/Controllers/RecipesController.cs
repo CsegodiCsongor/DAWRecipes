@@ -8,7 +8,6 @@ using RecipesDAW.Models;
 
 namespace RecipesDAW.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]/[action]")]
     public class RecipesController : Controller
     {
@@ -48,6 +47,7 @@ namespace RecipesDAW.Controllers
         //}
 
         [HttpGet("{recipeID?}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public SRecipe DetailRecipe([FromQuery]Guid? recipeID)
         {
             if(recipeID==null)
