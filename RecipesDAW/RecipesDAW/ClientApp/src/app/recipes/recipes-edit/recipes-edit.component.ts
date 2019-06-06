@@ -5,6 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { RecipesService } from '../recipes.service';
 import { Recipe, Ingredient, Instruction } from './../recipes.models';
 
+import { HttpRequestInterceptor } from '../../core/services/http-request-interceptor';
+import { Token } from '../../shared/security.model';
+import { interceptingHandler } from '@angular/common/http/src/module';
+
 @Component({
   selector: 'app-recipes-edit',
   templateUrl: './recipes-edit.component.html',
@@ -15,6 +19,8 @@ export class RecipesEditComponent implements OnInit {
   private routerLink: string = '';
 
   public recipe: Recipe;
+
+  public token: Token;
 
   private recipeID: string;
 
@@ -30,28 +36,42 @@ export class RecipesEditComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private recipesService: RecipesService,
-    private fb: FormBuilder) { }
+    private fb: FormBuilder,
+    private interceptor: HttpRequestInterceptor) {
+
+    //this.token = null;
+    //  this.token = interceptor.getToken();
+
+    //  if (!this.token) {
+    //    this.router.navigate(['login']);
+    //}
+
+    //this.router.navigate(['login']);
+  }
 
 
 
   ngOnInit() {
 
-    this.recipeID = this.route.snapshot.params['id'];
+    //if (this.token == null) {
+    //  this.router.navigate(['login']);
+    //}
+   
+      this.recipeID = this.route.snapshot.params['id'];
 
-    if (this.recipeID != 'new') {
-      this.routerLink = '';
-      this.isEdit = true;
-    }
-    else {
-      this.recipeID = null;
-      //this.recipe = <Recipe>{};
-    }
+      if (this.recipeID != 'new') {
+        this.routerLink = '';
+        this.isEdit = true;
+      }
+      else {
+        this.recipeID = null;
+        //this.recipe = <Recipe>{};
+      }
 
-    this.recipesService.loadRecipe(this.recipeID).subscribe(res => {
-      this.recipe = res;
-      this.initForm(this.recipe);
-    });
-
+      this.recipesService.loadRecipe(this.recipeID).subscribe(res => {
+        this.recipe = res;
+        this.initForm(this.recipe);
+      });
   }
 
 
@@ -91,9 +111,11 @@ export class RecipesEditComponent implements OnInit {
 
     if (this.isEdit) {
       this.recipeForm = this.fb.group({
-        title: [recipe.title],
-        description: [recipe.description],
-        serves: [recipe.serves],
+        title: [recipe.title, Validators.required,
+        Validators.minLength(4)],
+        description: [recipe.description, Validators.required,
+        Validators.minLength(4)],
+        serves: [recipe.serves, Validators.required],
         imageUrl: [recipe.imageUrl],
         instructions: this.fb.array([]),
         ingredients: this.fb.array([])
@@ -133,8 +155,8 @@ export class RecipesEditComponent implements OnInit {
 
   private createIngredient(amount: string, name: string): FormGroup {
     return this.fb.group({
-      amount: [amount],
-      name: [name]
+      amount: [amount, Validators.required],
+      name: [name, Validators.required]
     });
   }
 
@@ -142,7 +164,7 @@ export class RecipesEditComponent implements OnInit {
 
   private createInstruction(instruction: string): FormGroup {
     return this.fb.group({
-      instruction: [instruction]
+      instruction: [instruction, Validators.required]
     });
   }
 

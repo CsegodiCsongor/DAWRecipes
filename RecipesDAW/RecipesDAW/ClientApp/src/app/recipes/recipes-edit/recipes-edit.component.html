@@ -65,32 +65,50 @@
 
   <form *ngIf="recipeForm" [formGroup]="recipeForm">
 
-   <div class="form-group w-100 title d-flex justify-content-center">
-     <div class="col-2 d-flex justify-content-end align-items-center">
-       <label class="mb-0">Title:</label>
-     </div>
-     <div class="col-6">
-       <input type="text" class="form-control w-100" placeholder="Title..." formControlName="title">
-     </div>
-     <div class="col-1"></div>
-   </div>
+    <div class="form-group w-100 title d-flex justify-content-center">
+      <div class="col-2 d-flex justify-content-end align-items-center">
+        <label class="mb-0">Title:</label>
+      </div>
+      <div class="col-6">
+        <input type="text" class="form-control w-100" placeholder="Title..." formControlName="title" required minlength="4">
+      </div>
+      <div class="col-1"></div>
+    </div>
+
+    <div *ngIf="recipeForm.controls['title'].invalid  && (recipeForm.controls['title'].dirty || recipeForm.controls['title'].touched) " class="alert alert-danger error break col-2 d-flex justify-content-end align-items-center">
+      <div *ngIf="recipeForm.controls['title'].errors.required">
+        title is required.
+      </div>
+      <div *ngIf="recipeForm.controls['title'].errors.minlength">
+        title is short.
+      </div>
+    </div>
 
     <div class="form-group w-100 title d-flex justify-content-center">
       <div class="col-2 d-flex justify-content-end align-items-center">
         <label class="mb-0">Description:</label>
       </div>
       <div class="col-6">
-        <input type="text" class="form-control w-100" placeholder="Description..." formControlName="description">
+        <input type="text" class="form-control w-100" placeholder="Description..." formControlName="description" required minlength="4">
       </div>
       <div class="col-1"></div>
     </div>
+
+    <!--<div *ngIf="recipeForm.controls['description'].invalid  && (recipeForm.controls['description'].dirty || recipeForm.controls['description'].touched) " class="alert alert-danger error break col-2 d-flex justify-content-end align-items-center">
+      <div *ngIf="recipeForm.controls['description'].errors.required">
+        title is required.
+      </div>
+      <div *ngIf="recipeForm.controls['description'].errors.minlength">
+        title is short.
+      </div>
+    </div>-->
 
     <div class="form-group w-100 title d-flex justify-content-center">
       <div class="col-2 d-flex justify-content-end align-items-center">
         <label class="mb-0">Serves:</label>
       </div>
       <div class="col-6">
-        <input type="text" class="form-control w-100" placeholder="Serves..." formControlName="serves">
+        <input type="text" class="form-control w-100" placeholder="Serves..." formControlName="serves" required minlength="4">
       </div>
       <div class="col-1"></div>
     </div>
@@ -100,7 +118,7 @@
         <label class="mb-0">Image URL:</label>
       </div>
       <div class="col-6">
-        <input type="text" class="form-control w-100" placeholder="Image URL..." formControlName="imageUrl">
+        <input type="text" class="form-control w-100" placeholder="Image URL..." formControlName="imageUrl" required minlength="4">
       </div>
       <div class="col-1"></div>
     </div>
@@ -118,7 +136,7 @@
             <label class="mb-0">{{i+1}}</label>
           </div>
           <div class="col-3">
-            <input type="text" class="form-control w-100" placeholder="Amount..." formControlName="amount">
+            <input type="text" class="form-control w-100" placeholder="Amount..." formControlName="amount" required minlength="4">
           </div>
           <div class="col-3">
             <input type="text" class="form-control w-100" placeholder="Name..." formControlName="name">
@@ -127,6 +145,16 @@
             <button class="btn btn-danger" (click)="deleteIngredient(i)">Delete</button>
           </div>
         </div>
+
+        <!--<div *ngIf="recipeForm.controls['ingredients[i].name'].invalid  && (recipeForm.controls['ingredients[i].name'].dirty || recipeForm.controls['ingredients[i].name'].touched) " class="alert alert-danger error break col-2 d-flex justify-content-end align-items-center">
+          <div *ngIf="recipeForm.controls['ingredients[i].name'].errors.required">
+            title is required.
+          </div>
+          <div *ngIf="recipeForm.controls['ingredients[i].name'].errors.minlength">
+            title is short.
+          </div>
+        </div>-->
+
       </div>
       <div class="w-100 d-flex justify-content-center">
         <div class="col-1"></div>
@@ -149,7 +177,7 @@
             <label class="mb-0">{{i+1}}</label>
           </div>
           <div class="col-6 d-flex align-items-center">
-            <input type="text" class="form-control w-100" placeholder="Add an instruction..." formControlName="instruction">
+            <input type="text" class="form-control w-100" placeholder="Add an instruction..." formControlName="instruction" required minlength="4">
           </div>
           <div class="col-1 d-flex align-items-center">
             <button class="btn btn-danger" (click)="deleteInstruction(i)">Delete</button>
