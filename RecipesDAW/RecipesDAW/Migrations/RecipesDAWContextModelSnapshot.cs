@@ -203,15 +203,15 @@ namespace RecipesDAW.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid?>("RecipeId");
+                    b.Property<Guid?>("RecipeIdId");
 
                     b.Property<string>("instruction");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecipeId");
+                    b.HasIndex("RecipeIdId");
 
-                    b.ToTable("instructions");
+                    b.ToTable("Instructions");
                 });
 
             modelBuilder.Entity("RecipesDAW.Models.Recipe", b =>
@@ -286,9 +286,9 @@ namespace RecipesDAW.Migrations
 
             modelBuilder.Entity("RecipesDAW.Models.Instruction", b =>
                 {
-                    b.HasOne("RecipesDAW.Models.Recipe", "Recipe")
+                    b.HasOne("RecipesDAW.Models.Recipe", "RecipeId")
                         .WithMany("Instructions")
-                        .HasForeignKey("RecipeId");
+                        .HasForeignKey("RecipeIdId");
                 });
 #pragma warning restore 612, 618
         }

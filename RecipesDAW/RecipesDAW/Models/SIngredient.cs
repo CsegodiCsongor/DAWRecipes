@@ -7,6 +7,7 @@ namespace RecipesDAW.Models
 {
     public class SIngredient
     {
+        public Guid Id { get; set; }
         public string amount { get; set; }
         public string name { get; set; }
     }

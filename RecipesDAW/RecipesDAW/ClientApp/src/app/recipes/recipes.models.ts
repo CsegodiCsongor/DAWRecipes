@@ -1,9 +1,11 @@
 export interface Ingredient {
+  id: string;
   amount: string;
   name: string;
 }
 
 export interface Instruction {
+  id: string;
   instruction: string;
 }
 

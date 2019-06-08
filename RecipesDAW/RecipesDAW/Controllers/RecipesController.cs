@@ -18,33 +18,12 @@ namespace RecipesDAW.Controllers
             _context = context;
         }
 
-        // GET: api/Recipes
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Recipe>>> ListRecipes()
-        //{
-        //    return await _context.Recipe.ToListAsync();
-        //}
-
         [HttpGet]
         public IEnumerable<Recipe> ListRecipes()
         {
             Recipe[] cRecipe=_context.Recipes.ToArray();
             return cRecipe;
         }
-
-        // GET: api/Recipes/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Recipe>> DetailRecipe(Guid id)
-        //{
-        //    var recipe = await _context.Recipe.FindAsync(id);
-
-        //    if (recipe == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return recipe;
-        //}
 
         [HttpGet("{recipeID?}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -58,8 +37,10 @@ namespace RecipesDAW.Controllers
             Recipe cRecipe=_context.Recipes.FirstOrDefault(db => db.Id == recipeID);
 
             List<Ingredient> ing = _context.Ingredients.Where(i => i.Recipe.Id == cRecipe.Id).ToList();
-            List<Instruction> inst = _context.instructions.Where(i => i.Recipe.Id == cRecipe.Id).ToList();
+            List<Instruction> inst = _context.Instructions.Where(i => i.Recipe.Id == cRecipe.Id).ToList();
 
+            cRecipe.Ingredients = ing;
+            cRecipe.Instructions = inst;
 
             SRecipe cR = new SRecipe()
             {
@@ -75,6 +56,7 @@ namespace RecipesDAW.Controllers
             {
                 SI.Add(new SIngredient()
                 {
+                    Id = ingr.Id,
                     name = ingr.name,
                     amount = ingr.amount
                 });
@@ -85,6 +67,7 @@ namespace RecipesDAW.Controllers
             {
                 Sintsr.Add(new SInstruction()
                 {
+                    Id=instr.Id,
                     instruction = instr.instruction
                 });
             }
@@ -97,23 +80,43 @@ namespace RecipesDAW.Controllers
             return cR;
         }
 
-        // POST: api/Recipes
-        //[HttpPost]
-        //public async Task<ActionResult<Recipe>> SaveRecipe(Recipe recipe)
-        //{
-        //    _context.Recipe.Add(recipe);
-        //    await _context.SaveChangesAsync();
 
-        //    return CreatedAtAction("GetRecipe", new { id = recipe.Id }, recipe);
-        //}
-
-        public void SaveRecipe([FromBody]Recipe recipe)
+        public void SaveRecipe([FromBody]SRecipe recipe)
         {
             if (recipe.Id == Guid.Empty)
             {
                 recipe.Id = Guid.NewGuid();
+                Recipe r = new Recipe
+                {
+                    Id = recipe.Id,
+                    Title = recipe.Title,
+                    Description = recipe.Description,
+                    Serves = recipe.Serves,
+                    ImageUrl = recipe.ImageUrl
+                };
 
-                _context.Recipes.Add(recipe);
+                List<Ingredient> ing = new List<Ingredient>();
+                for(int i=0;i<recipe.Ingredients.Count;i++)
+                {
+                    ing.Add(new Ingredient()
+                    {
+                        name = recipe.Ingredients[i].name,
+                        amount = recipe.Ingredients[i].amount
+                    });
+                }
+
+                List<Instruction> instr = new List<Instruction>();
+                for (int i = 0; i < recipe.Instructions.Count; i++)
+                {
+                    instr.Add(new Instruction()
+                    {
+                        instruction = recipe.Instructions[i].instruction
+                    });
+                }
+
+                r.Ingredients = ing;
+                r.Instructions = instr;
+                _context.Recipes.Add(r);
             }
             else
             {
@@ -123,40 +126,108 @@ namespace RecipesDAW.Controllers
                 recipe1.ImageUrl = recipe.ImageUrl;
                 recipe1.Description = recipe.Description;
 
-                List<Ingredient> ing = _context.Ingredients.Where(i => i.Recipe.Id == recipe.Id).ToList();
-                List<Instruction> inst = _context.instructions.Where(i => i.Recipe.Id == recipe.Id).ToList();
-                ing.Clear();
-                inst.Clear();
-
-                recipe1.Ingredients = recipe.Ingredients;
-                recipe1.Instructions = recipe.Instructions;
+               UpdateIng(recipe.Ingredients, recipe.Id);
+               UpdateInstr(recipe.Instructions, recipe.Id);        
             }
 
             _context.SaveChanges();
         }
 
 
-        // DELETE: api/Recipes/5
-        //[HttpDelete("{id}")]
-        //public async Task<ActionResult<Recipe>> DeleteRecipe(Guid id)
-        //{
-        //    var recipe = await _context.Recipes.FindAsync(id);
-        //    if (recipe == null)
-        //    {
-        //        return NotFound();
-        //    }
+        public void UpdateIng(List<SIngredient> ingredients, Guid id)
+        {
+            List<Ingredient> ing = _context.Ingredients.Where(i => i.Recipe.Id == id).ToList();
 
-        //    _context.Recipes.Remove(recipe);
-        //    await _context.SaveChangesAsync();
+            for (int i = 0; i < ing.Count; i++)
+            {
+                bool found = false;
 
-        //    return recipe;
-        //}
+                for (int j = 0; j < ingredients.Count; j++)
+                {
+                    if (ing[i].Id == ingredients[j].Id && ing[i].Id!=null)
+                    {
+                        found = true;
+                        ing[i].name = ingredients[j].name;
+                        ing[i].amount = ingredients[j].amount;
+                        ingredients.RemoveAt(j);
+                        j--;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    _context.Ingredients.Remove(ing[i]);
+                    ing.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            for (int i = 0; i < ingredients.Count; i++)
+            {
+                Ingredient ingr = new Ingredient()
+                {
+                    Id = new Guid(),
+                    name =ingredients[i].name,
+                    amount=ingredients[i].amount,
+                };
+                ingr.Recipe = new Recipe()
+                {
+                    Id = id
+                };
+
+                _context.Ingredients.Add(ingr);
+            }
+        }
+
+
+        public void UpdateInstr(List<SInstruction> instructions, Guid id)
+        {
+            List<Instruction> instr = _context.Instructions.Where(i => i.Recipe.Id == id).ToList();
+
+            for (int i = 0; i < instr.Count; i++)
+            {
+                bool found = false;
+
+                for (int j = 0; j < instructions.Count; j++)
+                {
+                    if (instr[i].Id == instructions[j].Id && instr[i].Id != null)
+                    {
+                        found = true;
+                        instr[i].instruction = instructions[j].instruction;
+                        instructions.RemoveAt(j);
+                        j--;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    _context.Instructions.Remove(instr[i]);
+                    instr.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                Instruction inst = new Instruction()
+                {
+                    Id = new Guid(),
+                    instruction = instructions[i].instruction,
+                };
+                inst.Recipe = new Recipe()
+                {
+                    Id = id
+                };
+
+                _context.Instructions.Add(inst);
+            }
+        }
 
         public void DeleteRecipe([FromQuery]Guid RecipeId)
         {
             Recipe dbRecipe = _context.Recipes.FirstOrDefault(db => db.Id == RecipeId);
-
-            _context.Recipes.Remove(dbRecipe);
 
             List<Ingredient> auxing= _context.Ingredients.Where(ing => ing.Recipe.Id == RecipeId).ToList();
             foreach(Ingredient ing in auxing)
@@ -164,11 +235,13 @@ namespace RecipesDAW.Controllers
                 _context.Ingredients.Remove(ing);
             }
 
-            List<Instruction> auxinstr = _context.instructions.Where(instr => instr.Recipe.Id == RecipeId).ToList();
+            List<Instruction> auxinstr = _context.Instructions.Where(instr => instr.Recipe.Id == RecipeId).ToList();
             foreach (Instruction instr in auxinstr)
             {
-                _context.instructions.Remove(instr);
+                _context.Instructions.Remove(instr);
             }
+
+            _context.Recipes.Remove(dbRecipe);
 
             _context.SaveChanges();
         }

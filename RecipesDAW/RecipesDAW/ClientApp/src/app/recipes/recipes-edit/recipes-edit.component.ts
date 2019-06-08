@@ -1,13 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PACKAGE_ROOT_URL } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, Form, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { RecipesService } from '../recipes.service';
 import { Recipe, Ingredient, Instruction } from './../recipes.models';
-
-import { HttpRequestInterceptor } from '../../core/services/http-request-interceptor';
-import { Token } from '../../shared/security.model';
-import { interceptingHandler } from '@angular/common/http/src/module';
 
 @Component({
   selector: 'app-recipes-edit',
@@ -20,11 +16,13 @@ export class RecipesEditComponent implements OnInit {
 
   public recipe: Recipe;
 
-  public token: Token;
-
   private recipeID: string;
 
+  private emptyIp: string = '00000000-0000-0000-0000-000000000000';
+
   private isEdit: boolean = false;
+
+  public message: string;
 
   public recipeForm: FormGroup;
   private instructions: FormArray;
@@ -36,26 +34,13 @@ export class RecipesEditComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private recipesService: RecipesService,
-    private fb: FormBuilder,
-    private interceptor: HttpRequestInterceptor) {
-
-    //this.token = null;
-    //  this.token = interceptor.getToken();
-
-    //  if (!this.token) {
-    //    this.router.navigate(['login']);
-    //}
-
-    //this.router.navigate(['login']);
+    private fb: FormBuilder
+  ) {
   }
 
 
 
   ngOnInit() {
-
-    //if (this.token == null) {
-    //  this.router.navigate(['login']);
-    //}
    
       this.recipeID = this.route.snapshot.params['id'];
 
@@ -65,7 +50,6 @@ export class RecipesEditComponent implements OnInit {
       }
       else {
         this.recipeID = null;
-        //this.recipe = <Recipe>{};
       }
 
       this.recipesService.loadRecipe(this.recipeID).subscribe(res => {
@@ -77,32 +61,34 @@ export class RecipesEditComponent implements OnInit {
 
 
   save() {
-    Object.keys(this.recipeForm.controls).forEach(control => {
-      this.recipeForm.get(control).markAsTouched();
-    });
-    const { title, description, serves, imageUrl, ingredients, instructions } = this.recipeForm.value;
+    if (this.recipeForm.valid) {
+      Object.keys(this.recipeForm.controls).forEach(control => {
+        this.recipeForm.get(control).markAsTouched();
+      });
+      const { title, description, serves, imageUrl, ingredients, instructions } = this.recipeForm.value;
 
-    //const filteredInstructions = instructions.map(item => item.instruction);
+      let id;
 
-    let id;
+      if (this.isEdit) {
+        id = this.recipeID;
+      }
 
-    if (this.isEdit) {
-      id = this.recipeID;
-    }
-
-    let recipe: Recipe = {
-      id: id,
-      title,
-      description,
-      serves,
-      imageUrl,
-      ingredients,
-      //instructions: filteredInstructions
-      instructions
-    };
+      let recipe: Recipe = {
+        id: id,
+        title,
+        description,
+        serves,
+        imageUrl,
+        ingredients,
+        instructions
+      };
       this.recipesService.saveRecipe(recipe).subscribe(res => {
         this.router.navigate(['']);
       });
+    }
+    else {
+      this.message = "All tabs are required";
+    }
   }
 
 
@@ -111,22 +97,20 @@ export class RecipesEditComponent implements OnInit {
 
     if (this.isEdit) {
       this.recipeForm = this.fb.group({
-        title: [recipe.title, Validators.required,
-        Validators.minLength(4)],
-        description: [recipe.description, Validators.required,
-        Validators.minLength(4)],
-        serves: [recipe.serves, Validators.required],
-        imageUrl: [recipe.imageUrl],
+        title: [recipe.title, [Validators.required]],
+        description: [recipe.description, [Validators.required]],
+        serves: [recipe.serves, [Validators.required]],
+        imageUrl: [recipe.imageUrl, [Validators.required]],
         instructions: this.fb.array([]),
         ingredients: this.fb.array([])
       });
     }
     else {
       this.recipeForm = this.fb.group({
-        title: [''],
-        description: [''],
-        serves: [''],
-        imageUrl: [''],
+        title: ['', [Validators.required]],
+        description: ['',[ Validators.required]],
+        serves: ['', [Validators.required]],
+        imageUrl: ['', [Validators.required]],
         instructions: this.fb.array([]),
         ingredients: this.fb.array([])
       });
@@ -137,46 +121,47 @@ export class RecipesEditComponent implements OnInit {
 
     if (this.isEdit) {
       this.recipe.ingredients.forEach(ingredient => {
-        this.ingredients.push(this.createIngredient(ingredient.amount, ingredient.name));
+        this.ingredients.push(this.createIngredient(ingredient.id, ingredient.amount, ingredient.name));
       });
 
       this.recipe.instructions.forEach(instruction => {
-        this.instructions.push(this.createInstruction(instruction.instruction));
+        this.instructions.push(this.createInstruction(instruction.id, instruction.instruction));
       });
     }
     else {
-      this.instructions.push(this.createInstruction(""));
-      this.ingredients.push(this.createIngredient("", ""));
+      this.instructions.push(this.createInstruction(this.emptyIp, ""));
+      this.ingredients.push(this.createIngredient(this.emptyIp,"", ""));
     }
-    //console.log(this.recipeForm.value);
   }
 
 
 
-  private createIngredient(amount: string, name: string): FormGroup {
+  private createIngredient(id: string, amount: string, name: string): FormGroup {
     return this.fb.group({
-      amount: [amount, Validators.required],
-      name: [name, Validators.required]
+      id: [id],
+      amount: [amount, [Validators.required]],
+      name: [name, [Validators.required]]
     });
   }
 
 
 
-  private createInstruction(instruction: string): FormGroup {
+  private createInstruction(id: string, instruction: string): FormGroup {
     return this.fb.group({
-      instruction: [instruction, Validators.required]
+      id: [id],
+      instruction: [instruction, [Validators.required]]
     });
   }
 
 
   addIngredient(): void {
-    this.ingredients.push(this.createIngredient('', ''));
+    this.ingredients.push(this.createIngredient(this.emptyIp,'', ''));
   }
 
 
 
   addInstruction(): void {
-    this.instructions.push(this.createInstruction(''));
+    this.instructions.push(this.createInstruction(this.emptyIp,''));
   }
 
 

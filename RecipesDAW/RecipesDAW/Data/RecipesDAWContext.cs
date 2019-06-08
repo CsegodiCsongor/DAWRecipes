@@ -16,6 +16,6 @@ namespace RecipesDAW.Models
 
         public DbSet<RecipesDAW.Models.Recipe> Recipes { get; set; }
         public DbSet<RecipesDAW.Models.Ingredient> Ingredients { get; set; }
-        public DbSet<RecipesDAW.Models.Instruction> instructions { get; set; }
+        public DbSet<RecipesDAW.Models.Instruction> Instructions { get; set; }
     }
 }

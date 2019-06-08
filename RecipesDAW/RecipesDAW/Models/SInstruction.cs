@@ -7,6 +7,7 @@ namespace RecipesDAW.Models
 {
     public class SInstruction
     {
+        public Guid Id { get; set; }
         public string instruction { get; set; }
     }
 }
