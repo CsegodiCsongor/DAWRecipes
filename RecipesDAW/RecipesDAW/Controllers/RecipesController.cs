@@ -11,17 +11,17 @@ namespace RecipesDAW.Controllers
     [Route("api/[controller]/[action]")]
     public class RecipesController : Controller
     {
-        private readonly RecipesDAWContext _context;
+        private readonly RecipesDAWContext recipesDAWContext;
 
         public RecipesController(RecipesDAWContext context)
         {
-            _context = context;
+            recipesDAWContext = context;
         }
 
         [HttpGet]
         public IEnumerable<Recipe> ListRecipes()
         {
-            Recipe[] cRecipe=_context.Recipes.ToArray();
+            Recipe[] cRecipe = recipesDAWContext.Recipes.ToArray();
             return cRecipe;
         }
 
@@ -29,55 +29,55 @@ namespace RecipesDAW.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public SRecipe DetailRecipe([FromQuery]Guid? recipeID)
         {
-            if(recipeID==null)
+            if (recipeID == null)
             {
                 return new SRecipe();
             }
 
-            Recipe cRecipe=_context.Recipes.FirstOrDefault(db => db.Id == recipeID);
+            Recipe auxRecipe = recipesDAWContext.Recipes.FirstOrDefault(db => db.Id == recipeID);
 
-            List<Ingredient> ing = _context.Ingredients.Where(i => i.Recipe.Id == cRecipe.Id).ToList();
-            List<Instruction> inst = _context.Instructions.Where(i => i.Recipe.Id == cRecipe.Id).ToList();
+            List<Ingredient> ingredients = recipesDAWContext.Ingredients.Where(i => i.Recipe.Id == auxRecipe.Id).ToList();
+            List<Instruction> instructions = recipesDAWContext.Instructions.Where(i => i.Recipe.Id == auxRecipe.Id).ToList();
 
-            cRecipe.Ingredients = ing;
-            cRecipe.Instructions = inst;
+            auxRecipe.Ingredients = ingredients;
+            auxRecipe.Instructions = instructions;
 
-            SRecipe cR = new SRecipe()
+            SRecipe currentRecipe = new SRecipe()
             {
-                Title = cRecipe.Title,
-                Description = cRecipe.Description,
-                Serves = cRecipe.Serves,
-                ImageUrl = cRecipe.ImageUrl,
-                Id = cRecipe.Id
+                Title = auxRecipe.Title,
+                Description = auxRecipe.Description,
+                Serves = auxRecipe.Serves,
+                ImageUrl = auxRecipe.ImageUrl,
+                Id = auxRecipe.Id
             };
 
-            List<SIngredient> SI = new List<SIngredient>();
-            foreach(Ingredient ingr in ing)
+            List<SIngredient> currentIngredients = new List<SIngredient>();
+            foreach (Ingredient ingredient in ingredients)
             {
-                SI.Add(new SIngredient()
+                currentIngredients.Add(new SIngredient()
                 {
-                    Id = ingr.Id,
-                    name = ingr.name,
-                    amount = ingr.amount
+                    Id = ingredient.Id,
+                    name = ingredient.name,
+                    amount = ingredient.amount
                 });
             }
 
-            List<SInstruction> Sintsr = new List<SInstruction>();
-            foreach(Instruction instr in inst)
+            List<SInstruction> currentInstructions = new List<SInstruction>();
+            foreach (Instruction instruction in instructions)
             {
-                Sintsr.Add(new SInstruction()
+                currentInstructions.Add(new SInstruction()
                 {
-                    Id=instr.Id,
-                    instruction = instr.instruction
+                    Id = instruction.Id,
+                    instruction = instruction.instruction
                 });
             }
-            cRecipe.Ingredients = ing;
-            cRecipe.Instructions = inst;
+            auxRecipe.Ingredients = ingredients;
+            auxRecipe.Instructions = instructions;
 
-           cR.Ingredients = SI;
-           cR.Instructions = Sintsr;
+            currentRecipe.Ingredients = currentIngredients;
+            currentRecipe.Instructions = currentInstructions;
 
-            return cR;
+            return currentRecipe;
         }
 
 
@@ -86,7 +86,7 @@ namespace RecipesDAW.Controllers
             if (recipe.Id == Guid.Empty)
             {
                 recipe.Id = Guid.NewGuid();
-                Recipe r = new Recipe
+                Recipe RecipeToSave = new Recipe
                 {
                     Id = recipe.Id,
                     Title = recipe.Title,
@@ -95,160 +95,140 @@ namespace RecipesDAW.Controllers
                     ImageUrl = recipe.ImageUrl
                 };
 
-                List<Ingredient> ing = new List<Ingredient>();
-                for(int i=0;i<recipe.Ingredients.Count;i++)
+                List<Ingredient> ingredients = new List<Ingredient>();
+                foreach(SIngredient ingredient in recipe.Ingredients)
                 {
-                    ing.Add(new Ingredient()
+                    ingredients.Add(new Ingredient()
                     {
-                        name = recipe.Ingredients[i].name,
-                        amount = recipe.Ingredients[i].amount
+                        name = ingredient.name,
+                        amount = ingredient.amount
                     });
                 }
 
-                List<Instruction> instr = new List<Instruction>();
-                for (int i = 0; i < recipe.Instructions.Count; i++)
+                List<Instruction> instructions = new List<Instruction>();
+                foreach (SInstruction instruction in recipe.Instructions)
                 {
-                    instr.Add(new Instruction()
+                    instructions.Add(new Instruction()
                     {
-                        instruction = recipe.Instructions[i].instruction
+                        instruction = instruction.instruction
                     });
                 }
 
-                r.Ingredients = ing;
-                r.Instructions = instr;
-                _context.Recipes.Add(r);
+                RecipeToSave.Ingredients = ingredients;
+                RecipeToSave.Instructions = instructions;
+                recipesDAWContext.Recipes.Add(RecipeToSave);
             }
             else
             {
-                Recipe recipe1 = _context.Recipes.FirstOrDefault(Recipe => Recipe.Id == recipe.Id);
-                recipe1.Title = recipe.Title;
-                recipe1.Serves = recipe.Serves;
-                recipe1.ImageUrl = recipe.ImageUrl;
-                recipe1.Description = recipe.Description;
+                Recipe currentRecipe = recipesDAWContext.Recipes.FirstOrDefault(Recipe => Recipe.Id == recipe.Id);
+                currentRecipe.Title = recipe.Title;
+                currentRecipe.Serves = recipe.Serves;
+                currentRecipe.ImageUrl = recipe.ImageUrl;
+                currentRecipe.Description = recipe.Description;
 
-               UpdateIng(recipe.Ingredients, recipe.Id);
-               UpdateInstr(recipe.Instructions, recipe.Id);        
+                UpdateIngredients(recipe.Ingredients, recipe.Id);
+                UpdateInstructions(recipe.Instructions, recipe.Id);
             }
 
-            _context.SaveChanges();
+            recipesDAWContext.SaveChanges();
         }
 
 
-        public void UpdateIng(List<SIngredient> ingredients, Guid id)
+        public void UpdateIngredients(List<SIngredient> ingredients, Guid id)
         {
-            List<Ingredient> ing = _context.Ingredients.Where(i => i.Recipe.Id == id).ToList();
+            Ingredient[] dbIngridients = recipesDAWContext.Ingredients.Where(i => i.Recipe.Id == id).ToArray();
 
-            for (int i = 0; i < ing.Count; i++)
+            foreach (Ingredient dbIngredient in dbIngridients)
             {
-                bool found = false;
+                SIngredient ingredient = ingredients.FirstOrDefault(x => x.Id == dbIngredient.Id);
 
-                for (int j = 0; j < ingredients.Count; j++)
+                if (ingredient != null)
                 {
-                    if (ing[i].Id == ingredients[j].Id && ing[i].Id!=null)
-                    {
-                        found = true;
-                        ing[i].name = ingredients[j].name;
-                        ing[i].amount = ingredients[j].amount;
-                        ingredients.RemoveAt(j);
-                        j--;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    _context.Ingredients.Remove(ing[i]);
-                    ing.RemoveAt(i);
-                    i--;
+                    dbIngredient.name = ingredient.name;
+                    dbIngredient.amount = ingredient.amount;
                 }
             }
 
-            for (int i = 0; i < ingredients.Count; i++)
-            {
-                Ingredient ingr = new Ingredient()
-                {
-                    Id = new Guid(),
-                    name =ingredients[i].name,
-                    amount=ingredients[i].amount,
-                };
-                ingr.Recipe = new Recipe()
-                {
-                    Id = id
-                };
+            recipesDAWContext.Ingredients.RemoveRange(dbIngridients.Where(dbIngridient => !ingredients.Any(ingridient => ingridient.Id == dbIngridient.Id)));
 
-                _context.Ingredients.Add(ingr);
+            foreach (SIngredient ingredient in ingredients)
+            {
+                Ingredient dbIngredient = dbIngridients.FirstOrDefault(x => x.Id == ingredient.Id);
+
+                if (dbIngredient == null)
+                {
+                    dbIngredient = new Ingredient()
+                    {
+                        Id = new Guid(),
+                        name = ingredient.name,
+                        amount = ingredient.amount,
+                        Recipe = new Recipe() { Id = id }
+                    };
+
+                    recipesDAWContext.Ingredients.Add(dbIngredient);
+                }
             }
         }
 
 
-        public void UpdateInstr(List<SInstruction> instructions, Guid id)
+        public void UpdateInstructions(List<SInstruction> instructions, Guid id)
         {
-            List<Instruction> instr = _context.Instructions.Where(i => i.Recipe.Id == id).ToList();
+            Instruction[] dbInstructions = recipesDAWContext.Instructions.Where(i => i.Recipe.Id == id).ToArray();
 
-            for (int i = 0; i < instr.Count; i++)
+            foreach (Instruction dbInstruction in dbInstructions)
             {
-                bool found = false;
+                SInstruction instruction = instructions.FirstOrDefault(x => x.Id == dbInstruction.Id);
 
-                for (int j = 0; j < instructions.Count; j++)
+                if (instruction != null)
                 {
-                    if (instr[i].Id == instructions[j].Id && instr[i].Id != null)
-                    {
-                        found = true;
-                        instr[i].instruction = instructions[j].instruction;
-                        instructions.RemoveAt(j);
-                        j--;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    _context.Instructions.Remove(instr[i]);
-                    instr.RemoveAt(i);
-                    i--;
+                    dbInstruction.instruction = instruction.instruction;
                 }
             }
 
-            for (int i = 0; i < instructions.Count; i++)
-            {
-                Instruction inst = new Instruction()
-                {
-                    Id = new Guid(),
-                    instruction = instructions[i].instruction,
-                };
-                inst.Recipe = new Recipe()
-                {
-                    Id = id
-                };
+            recipesDAWContext.Instructions.RemoveRange(dbInstructions.Where(dbInstruction => !instructions.Any(ingridient => ingridient.Id == dbInstruction.Id)));
 
-                _context.Instructions.Add(inst);
+            foreach (SInstruction instruction in instructions)
+            {
+                Instruction dbInstruction = dbInstructions.FirstOrDefault(x => x.Id == instruction.Id);
+
+                if (dbInstruction == null)
+                {
+                    dbInstruction = new Instruction()
+                    {
+                        Id = new Guid(),
+                        instruction = instruction.instruction,
+                        Recipe = new Recipe() { Id = id }
+                    };
+
+                    recipesDAWContext.Instructions.Add(dbInstruction);
+                }
             }
         }
 
         public void DeleteRecipe([FromQuery]Guid RecipeId)
         {
-            Recipe dbRecipe = _context.Recipes.FirstOrDefault(db => db.Id == RecipeId);
+            Recipe dbRecipe = recipesDAWContext.Recipes.FirstOrDefault(db => db.Id == RecipeId);
 
-            List<Ingredient> auxing= _context.Ingredients.Where(ing => ing.Recipe.Id == RecipeId).ToList();
-            foreach(Ingredient ing in auxing)
+            List<Ingredient> auxIngredient = recipesDAWContext.Ingredients.Where(ing => ing.Recipe.Id == RecipeId).ToList();
+            foreach (Ingredient ingredient in auxIngredient)
             {
-                _context.Ingredients.Remove(ing);
+                recipesDAWContext.Ingredients.Remove(ingredient);
             }
 
-            List<Instruction> auxinstr = _context.Instructions.Where(instr => instr.Recipe.Id == RecipeId).ToList();
-            foreach (Instruction instr in auxinstr)
+            List<Instruction> auxInstruction = recipesDAWContext.Instructions.Where(instr => instr.Recipe.Id == RecipeId).ToList();
+            foreach (Instruction instruction in auxInstruction)
             {
-                _context.Instructions.Remove(instr);
+                recipesDAWContext.Instructions.Remove(instruction);
             }
 
-            _context.Recipes.Remove(dbRecipe);
+            recipesDAWContext.Recipes.Remove(dbRecipe);
 
-            _context.SaveChanges();
+            recipesDAWContext.SaveChanges();
         }
 
         private bool RecipeExists(Guid id)
         {
-            return _context.Recipes.Any(e => e.Id == id);
+            return recipesDAWContext.Recipes.Any(e => e.Id == id);
         }
     }
 }
